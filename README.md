@@ -1,6 +1,3 @@
-Berikut adalah kode lengkap untuk file `README.md` Anda. Kode ini sudah disesuaikan dengan instruksi tugas, memperbaiki kendala teknis yang muncul di log, dan mencantumkan identitas Anda sebagai mahasiswa ITERA.
-
-```markdown
 # Note App - Kotlin Multiplatform (Upgrade: DI & Platform Features)
 
 Aplikasi manajemen catatan modern yang dibangun menggunakan **Compose Multiplatform**. Proyek ini mengimplementasikan sistem penyimpanan data lokal yang efisien, manajemen preferensi pengguna, serta fitur lintas platform menggunakan mekanisme *expect/actual* dengan Dependency Injection terpusat menggunakan **Koin**.
