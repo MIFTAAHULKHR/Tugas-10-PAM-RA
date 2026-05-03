@@ -1,204 +1,54 @@
 package org.example.project
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import org.jetbrains.compose.resources.painterResource
-
-import kotlinproject.composeapp.generated.resources.Res
-import kotlinproject.composeapp.generated.resources.Flowers
-
-sealed class Screen(val route: String, val title: String, val icon: ImageVector? = null) {
-    object Notes : Screen("notes", "Notes", Icons.Default.Description)
-    object Favorites : Screen("favorites", "Favorites", Icons.Default.Favorite)
-    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
-    object Profile : Screen("profile", "Profile", Icons.Default.Person)
-    object NoteDetail : Screen("note_detail/{noteId}", "Detail")
-    object AddNote : Screen("add_note", "Add Note")
-    object EditNote : Screen("edit_note/{noteId}", "Edit Note")
-}
+import org.koin.compose.koinInject
 
 @Composable
-fun App(
-    noteDataSource: NoteDataSource,
-    settingsDataSource: SettingsDataSource
-) {
-    val navController = rememberNavController()
-    val noteViewModel: NoteViewModel = viewModel { NoteViewModel(noteDataSource, settingsDataSource) }
-    val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel(settingsDataSource) }
-    
-    val profileUiState by profileViewModel.uiState.collectAsState()
-    val notesUiState by noteViewModel.uiState.collectAsState()
+fun App() {
+    // Navigasi sederhana menggunakan state
+    var currentScreen by remember { mutableStateOf("main") }
 
-    val colorScheme = if (profileUiState.isDarkMode) {
-        darkColorScheme(primary = Color(0xFFD0BCFF), background = Color(0xFF1C1B1F), surface = Color(0xFF1C1B1F))
-    } else {
-        lightColorScheme(primary = Color(0xFF2D2D2D), background = Color.White, surface = Color.White)
-    }
-
-    MaterialTheme(colorScheme = colorScheme) {
+    MaterialTheme {
         Scaffold(
             bottomBar = {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-                
-                if (currentRoute in listOf(Screen.Notes.route, Screen.Favorites.route, Screen.Profile.route, Screen.Settings.route)) {
-                    NavigationBar {
-                        val items = listOf(Screen.Notes, Screen.Favorites, Screen.Profile, Screen.Settings)
-                        items.forEach { screen ->
-                            NavigationBarItem(
-                                icon = { Icon(screen.icon!!, contentDescription = screen.title) },
-                                label = { Text(screen.title) },
-                                selected = currentRoute == screen.route,
-                                onClick = {
-                                    navController.navigate(screen.route) {
-                                        popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            },
-            floatingActionButton = {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                if (navBackStackEntry?.destination?.route == Screen.Notes.route) {
-                    FloatingActionButton(onClick = { navController.navigate(Screen.AddNote.route) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Note")
-                    }
-                }
-            }
-        ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Notes.route,
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                composable(Screen.Notes.route) {
-                    NotesScreen(noteViewModel, onNoteClick = { id -> 
-                        navController.navigate("note_detail/$id")
-                    })
-                }
-                composable(Screen.Favorites.route) {
-                    FavoritesScreen(noteViewModel, onNoteClick = { id ->
-                        navController.navigate("note_detail/$id")
-                    })
-                }
-                composable(Screen.Profile.route) {
-                    ProfileTabScreen(profileViewModel)
-                }
-                composable(Screen.Settings.route) {
-                    SettingsScreen(noteViewModel, profileViewModel)
-                }
-                composable(
-                    route = Screen.NoteDetail.route,
-                    arguments = listOf(navArgument("noteId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val noteId = backStackEntry.arguments?.getLong("noteId") ?: 0L
-                    NoteDetailScreen(noteId, noteViewModel, 
-                        onBack = { navController.popBackStack() },
-                        onEdit = { id -> navController.navigate("edit_note/$id") }
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = currentScreen == "main",
+                        onClick = { currentScreen = "main" },
+                        label = { Text("Notes") },
+                        icon = { Icon(Icons.Default.List, contentDescription = null) }
+                    )
+                    NavigationBarItem(
+                        selected = currentScreen == "settings",
+                        onClick = { currentScreen = "settings" },
+                        label = { Text("Settings") },
+                        icon = { Icon(Icons.Default.Settings, contentDescription = null) }
                     )
                 }
-                composable(Screen.AddNote.route) {
-                    AddNoteScreen(noteViewModel, onBack = { navController.popBackStack() })
-                }
-                composable(
-                    route = Screen.EditNote.route,
-                    arguments = listOf(navArgument("noteId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val noteId = backStackEntry.arguments?.getLong("noteId") ?: 0L
-                    EditNoteScreen(noteId, noteViewModel, onBack = { navController.popBackStack() })
-                }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun NotesScreen(viewModel: NoteViewModel, onNoteClick: (Long) -> Unit) {
-    val uiState by viewModel.uiState.collectAsState()
-    
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("My Notes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        OutlinedTextField(
-            value = uiState.searchQuery,
-            onValueChange = { viewModel.onSearchQueryChange(it) },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search notes...") },
-            leadingIcon = { Icon(Icons.Default.Search, null) },
-            shape = RoundedCornerShape(12.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        if (uiState.isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (uiState.notes.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(if (uiState.searchQuery.isEmpty()) "No notes yet" else "No notes found")
-            }
-        } else {
-            LazyColumn {
-                items(uiState.notes, key = { it.id!! }) { note ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onNoteClick(note.id!!) }
-                    ) {
-                        ListItem(
-                            headlineContent = { Text(note.title) },
-                            supportingContent = { Text(note.content, maxLines = 1) },
-                            trailingContent = {
-                                Row {
-                                    IconButton(onClick = { viewModel.toggleFavorite(note) }) {
-                                        Icon(
-                                            if (note.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                            contentDescription = null,
-                                            tint = if (note.isFavorite) Color.Red else Color.Gray
-                                        )
-                                    }
-                                    IconButton(onClick = { viewModel.deleteNote(note.id!!) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
-                                    }
-                                }
-                            }
-                        )
-                    }
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                if (currentScreen == "main") {
+                    MainScreen()
+                } else {
+                    SettingsScreen()
                 }
             }
         }
@@ -206,232 +56,76 @@ fun NotesScreen(viewModel: NoteViewModel, onNoteClick: (Long) -> Unit) {
 }
 
 @Composable
-fun FavoritesScreen(viewModel: NoteViewModel, onNoteClick: (Long) -> Unit) {
-    val uiState by viewModel.uiState.collectAsState()
-    val favoriteNotes = uiState.notes.filter { it.isFavorite }
-    
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Favorites", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-        if (favoriteNotes.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No favorite notes yet")
-            }
-        } else {
-            LazyColumn {
-                items(favoriteNotes, key = { it.id!! }) { note ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onNoteClick(note.id!!) }
-                    ) {
-                        ListItem(
-                            headlineContent = { Text(note.title) },
-                            supportingContent = { Text(note.content, maxLines = 1) }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
+fun MainScreen() {
+    // 1. Inject Dependensi melalui Koin
+    val networkMonitor: NetworkMonitor = koinInject()
+    val noteDataSource: NoteDataSource = koinInject()
 
-@Composable
-fun SettingsScreen(noteViewModel: NoteViewModel, profileViewModel: ProfileViewModel) {
-    val noteUiState by noteViewModel.uiState.collectAsState()
-    val profileUiState by profileViewModel.uiState.collectAsState()
-    
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Settings", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text("Appearance", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        ListItem(
-            headlineContent = { Text("Dark Mode") },
-            trailingContent = {
-                Switch(checked = profileUiState.isDarkMode, onCheckedChange = { profileViewModel.toggleDarkMode(it) })
-            }
-        )
-        
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text("Sort Order", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        SortOrder.values().forEach { order ->
-            Row(
-                modifier = Modifier.fillMaxWidth().clickable { noteViewModel.onSortOrderChange(order) }.padding(vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(selected = noteUiState.sortOrder == order, onClick = { noteViewModel.onSortOrderChange(order) })
-                Text(order.name.lowercase().capitalize(), modifier = Modifier.padding(start = 8.dp))
-            }
-        }
-    }
-}
+    // 2. Observasi Status Jaringan
+    val isConnected by networkMonitor.isConnected.collectAsState()
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun NoteDetailScreen(noteId: Long, viewModel: NoteViewModel, onBack: () -> Unit, onEdit: (Long) -> Unit) {
-    var note by remember { mutableStateOf<Note?>(null) }
-    
-    LaunchedEffect(noteId) {
-        note = viewModel.getNoteById(noteId)
-    }
-    
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Note Detail") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
-                },
-                actions = {
-                    note?.let {
-                        IconButton(onClick = { onEdit(it.id!!) }) { Icon(Icons.Default.Edit, null) }
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            if (note != null) {
-                Text(note!!.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(note!!.content, style = MaterialTheme.typography.bodyLarge)
-            } else {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Note not found")
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddNoteScreen(viewModel: NoteViewModel, onBack: () -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Add Note") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } }
-            )
-        }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(value = content, onValueChange = { content = it }, label = { Text("Content") }, modifier = Modifier.fillMaxWidth(), minLines = 5)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    if (title.isNotBlank()) {
-                        viewModel.addNote(title, content)
-                        onBack()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = title.isNotBlank()
-            ) {
-                Text("Save Note")
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditNoteScreen(noteId: Long, viewModel: NoteViewModel, onBack: () -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
+    // 3. UI State untuk Catatan (Loading, Empty, Content)
+    // Mengambil data dari SQLDelight Flow yang sudah kita buat sebelumnya
+    val notes by noteDataSource.getAllNotes().collectAsState(initial = emptyList())
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(noteId) {
-        viewModel.getNoteById(noteId)?.let {
-            title = it.title
-            content = it.content
-        }
+    // Simulasi loading sebentar
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(1000)
         isLoading = false
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Note") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } }
-            )
-        }
-    ) { padding ->
-        if (isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = content, onValueChange = { content = it }, label = { Text("Content") }, modifier = Modifier.fillMaxWidth(), minLines = 5)
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        if (title.isNotBlank()) {
-                            viewModel.updateNote(noteId, title, content)
-                            onBack()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = title.isNotBlank()
-                ) {
-                    Text("Update Note")
-                }
-            }
-        }
-    }
-}
+    Column(modifier = Modifier.fillMaxSize()) {
 
-@Composable
-fun ProfileTabScreen(viewModel: ProfileViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-    ProfileScreen(
-        uiState = uiState,
-        onToggleDarkMode = { viewModel.toggleDarkMode(it) },
-        onEditClick = { viewModel.setEditing(true) },
-        onSaveProfile = { name, bio -> viewModel.updateProfile(name, bio) },
-        onCancelEdit = { viewModel.setEditing(false) }
-    )
-}
-
-@Composable
-fun ProfileScreen(
-    uiState: ProfileUiState,
-    onToggleDarkMode: (Boolean) -> Unit,
-    onEditClick: () -> Unit,
-    onSaveProfile: (String, String) -> Unit,
-    onCancelEdit: () -> Unit
-) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 60.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        // --- INDIKATOR JARINGAN ---
+        Surface(
+            color = if (isConnected) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            ProfileHeader(name = uiState.name, title = "Informatics Engineering Student")
-            Spacer(modifier = Modifier.height(32.dp))
-            if (uiState.isEditing) {
-                EditProfileForm(initialName = uiState.name, initialBio = uiState.bio, onSave = onSaveProfile, onCancel = onCancelEdit)
-            } else {
-                ProfileCard(bio = uiState.bio) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    InfoItem(icon = Icons.Outlined.Email, label = uiState.email)
-                    InfoItem(icon = Icons.Outlined.Phone, label = uiState.phone)
-                    InfoItem(icon = Icons.Outlined.LocationOn, label = uiState.location)
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(
+                            color = if (isConnected) Color.Green else Color.Red,
+                            shape = CircleShape
+                        )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isConnected) "Aplikasi Online" else "Aplikasi Offline (Lokal)",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isConnected) Color(0xFF2E7D32) else Color(0xFFC62828)
+                )
+            }
+        }
+
+        // --- LOGIKA UI STATE (Loading, Empty, Content) ---
+        when {
+            isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                Spacer(modifier = Modifier.height(32.dp))
-                Button(onClick = onEditClick, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(8.dp)) {
-                    Text("Edit Profile", fontWeight = FontWeight.Medium)
+            }
+            notes.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Belum ada catatan. Silakan tambah baru!", color = Color.Gray)
+                }
+            }
+            else -> {
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    items(notes) { note ->
+                        Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(note.title, fontWeight = FontWeight.Bold)
+                                Text(note.content, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -439,51 +133,30 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileHeader(name: String, title: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.size(120.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-            Image(painter = painterResource(Res.drawable.Flowers), contentDescription = "Profile Picture", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(text = name, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface)
-        Text(text = title, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp))
-    }
-}
+fun SettingsScreen() {
+    // 4. Inject DeviceInfo melalui Koin (expect/actual)
+    val deviceInfo: DeviceInfo = koinInject()
 
-@Composable
-fun InfoItem(icon: ImageVector, label: String) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-    }
-}
-
-@Composable
-fun ProfileCard(bio: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Biography", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary))
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = bio, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp, textAlign = TextAlign.Start), color = MaterialTheme.colorScheme.onSurface)
-        content()
-    }
-}
-
-@Composable
-fun EditProfileForm(initialName: String, initialBio: String, onSave: (String, String) -> Unit, onCancel: () -> Unit) {
-    var name by remember { mutableStateOf(initialName) }
-    var bio by remember { mutableStateOf(initialBio) }
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp))
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("Settings", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(value = bio, onValueChange = { bio = it }, label = { Text("Bio") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), minLines = 3)
-        Spacer(modifier = Modifier.height(24.dp))
-        Row(modifier = Modifier.fillMaxWidth()) {
-            TextButton(onClick = onCancel, modifier = Modifier.weight(1f).height(50.dp)) { Text("Cancel") }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(onClick = { onSave(name, bio) }, modifier = Modifier.weight(1f).height(50.dp), shape = RoundedCornerShape(8.dp)) { Text("Save") }
+
+        // Card Informasi Perangkat
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Info, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Informasi Perangkat", fontWeight = FontWeight.Bold)
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                Text("Model: ${deviceInfo.model}", style = MaterialTheme.typography.bodyLarge)
+                Text("OS: ${deviceInfo.osVersion}", style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 }
-
-fun String.capitalize() = replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }

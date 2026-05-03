@@ -34,6 +34,9 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.android.driver)
+
+            // Koin Android
+            implementation("io.insert-koin:koin-android:3.5.3")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -58,6 +61,10 @@ kotlin {
 
             // DataStore
             implementation(libs.androidx.datastore.preferences)
+
+            // Koin Dependency Injection
+            implementation("io.insert-koin:koin-core:3.5.3")
+            implementation("io.insert-koin:koin-compose:1.1.2")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

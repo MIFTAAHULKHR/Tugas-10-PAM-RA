@@ -4,27 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import org.example.project.database.NoteDatabase
+import org.example.project.di.initKoin        // Import fungsi initKoin
+import org.koin.android.ext.koin.androidContext // Import androidContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
-        val databaseDriverFactory = DatabaseDriverFactory(this)
-
-        // Perbaikan: Kita tidak perlu lagi membuat NoteEntity.Adapter secara manual
-        // karena kita sudah menangani konversi tipe data di NoteDataSource.kt
-        val noteDatabase = NoteDatabase(
-            driver = databaseDriverFactory.createDriver()
-        )
-
-        val noteDataSource = NoteDataSource(noteDatabase)
-        val dataStoreFactory = DataStoreFactory(this)
-        val settingsDataSource = SettingsDataSource(dataStoreFactory.create())
+        // --- LETAKKAN DI SINI ---
+        // Inisialisasi Koin saat aplikasi Android pertama kali dijalankan
+        initKoin {
+            androidContext(this@MainActivity) // Memberikan context Android ke Koin
+        }
+        // -------------------------
 
         setContent {
-            App(noteDataSource, settingsDataSource)
+            // Karena sudah menggunakan DI (Koin),
+            // Anda tidak perlu lagi membuat NoteDataSource secara manual di sini.
+            // Cukup panggil App() dan biarkan Koin yang menyuntikkan (inject) dependensinya.
+            App()
         }
     }
 }

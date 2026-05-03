@@ -1,36 +1,48 @@
-# Note App - Kotlin Multiplatform (Tugas SQLDelight)
+# Note App - Kotlin Multiplatform (Tugas SQLDelight & Dependency Injection)
 
-Aplikasi manajemen catatan (Notes) modern yang dibangun menggunakan **Compose Multiplatform**. Proyek ini mengimplementasikan sistem penyimpanan data lokal yang efisien menggunakan **SQLDelight**, manajemen preferensi pengguna dengan **Jetpack DataStore**, serta penanganan status UI yang komprehensif dan mendukung prinsip *offline-first*.
+Aplikasi manajemen catatan (Notes) modern yang dibangun menggunakan **Compose Multiplatform**. Proyek ini mengimplementasikan sistem penyimpanan data lokal yang efisien, manajemen preferensi pengguna, fitur lintas platform menggunakan mekanisme *expect/actual*, dan Dependency Injection terpusat menggunakan Koin.
 
 ## Fitur Utama
 
 ### 1. Operasi CRUD (SQLDelight)
-Implementasi penuh penyimpanan data lokal menggunakan SQLDelight yang bersifat *type-safe*:
+Manajemen data catatan dilakukan sepenuhnya di database lokal menggunakan **SQLDelight** yang bersifat *type-safe*:
 - **Create**: Menambahkan catatan baru dengan judul dan isi konten.
 - **Read**: Menampilkan daftar catatan secara real-time dari database SQLite.
-- **Update**: Mengedit judul, isi catatan, atau menandai catatan sebagai favorit.
-- **Delete**: Menghapus catatan secara permanen dari penyimpanan lokal.
+- **Update**: Mengedit konten catatan atau mengubah status favorit.
+- **Delete**: Menghapus catatan dari penyimpanan lokal secara permanen.
 
 ### 2. Fitur Pencarian (Search Functionality)
-Dilengkapi dengan fitur pencarian yang responsif. Pengguna dapat mencari catatan tertentu berdasarkan kata kunci pada judul atau isi konten secara instan (real-time) melalui query SQL yang dioptimalkan.
+Dilengkapi dengan fitur pencarian yang responsif. Pengguna dapat mencari catatan berdasarkan kata kunci pada judul maupun isi konten secara instan melalui query SQL yang dioptimalkan.
 
 ### 3. Pengaturan (Settings) dengan DataStore
-Mengelola preferensi pengguna secara persisten menggunakan Jetpack DataStore:
+Mengelola preferensi pengguna secara persisten menggunakan **Jetpack DataStore**:
 - **Theme Selection**: Beralih antara Tema Terang (Light) dan Tema Gelap (Dark).
 - **Sort Order**: Mengatur urutan tampilan catatan (berdasarkan waktu terbaru atau terlama) yang tersimpan secara permanen di DataStore.
 
-### 4. Offline First & UI States
-- **Offline First**: Aplikasi memprioritaskan data lokal. Semua data disimpan di SQLite, sehingga aplikasi tetap berfungsi penuh tanpa koneksi internet.
-- **Proper UI States**: Implementasi status antarmuka untuk pengalaman pengguna yang lebih baik:
-    - **Loading State**: Menampilkan indikator saat aplikasi sedang memproses atau memuat data.
-    - **Empty State**: Tampilan informatif jika belum ada catatan yang dibuat.
-    - **Content State**: Menampilkan daftar catatan dengan transisi yang halus saat data tersedia.
+### 4. Setup Koin Dependency Injection
+Menggunakan **Koin** untuk menangani injeksi dependensi di seluruh aplikasi secara konsisten:
+- **Injeksi Terpusat**: Seluruh komponen utama seperti `NoteDataSource`, `NetworkMonitor`, `DeviceInfo`, dan `SettingsDataSource` di-inject melalui Koin, menghindari instansiasi manual di dalam UI.
+- **Modularitas**: Pemisahan antara `appModule` (Common) dan `platformModule` (Android/iOS) untuk manajemen objek yang lebih bersih dan sesuai dengan kebutuhan masing-masing platform.
+
+### 5. Implementasi Fitur Platform (Expect/Actual)
+Menggunakan mekanisme **expect/actual** untuk mengakses API spesifik pada masing-masing platform:
+- **DeviceInfo**: Mendapatkan detail teknis perangkat (Model dan Versi OS) baik di Android maupun iOS. Implementasi ini memungkinkan aplikasi menampilkan informasi yang relevan dengan perangkat pengguna.
+- **NetworkMonitor**: Memantau status koneksi internet secara real-time menggunakan API konektivitas asli dari masing-masing platform (`ConnectivityManager` di Android).
 
 ---
 
 ## Dokumentasi Visual
 
-| Profile Screen | Sort Order | Searching |
+### Integrasi Antarmuka (UI) & Status Koneksi
+Aplikasi menampilkan indikator status jaringan secara *real-time* pada layar utama (**Main screen**) dan informasi perangkat pada layar pengaturan (**Settings screen**).
+
+| Aplikasi Online (Main Screen) | Aplikasi Offline (Main Screen) |
+| :---: | :---: |
+| <img src="pict/Online.png" width="350"> | <img src="pict/Offline.png" width="350"> |
+
+### Fitur Lainnya & Device Info
+
+| Profile & Device Info (Settings) | Sort Order | Searching |
 | :---: | :---: | :---: |
 | <img src="pict/profile.png" width="220"> | <img src="pict/SortOrder.png" width="220"> | <img src="pict/Searching.png" width="220"> |
 
@@ -42,11 +54,12 @@ Mengelola preferensi pengguna secara persisten menggunakan Jetpack DataStore:
 
 ## Arsitektur & Teknologi
 
-- **Compose Multiplatform**: Framework UI untuk Android dan Desktop.
-- **SQLDelight**: Database lokal untuk Kotlin Multiplatform dengan validasi skema saat compile-time.
-- **Jetpack DataStore**: Solusi penyimpanan preferensi (Key-Value) yang modern dan asinkron.
-- **MVVM Architecture**: Pemisahan logika bisnis (ViewModel) dan tampilan (UI) untuk kode yang lebih modular.
-- **Kotlin Coroutines & Flow**: Pengelolaan data asinkron dan aliran data reaktif dari database ke UI.
+- **Offline First**: Memastikan aplikasi tetap berfungsi penuh meskipun tanpa koneksi internet dengan memprioritaskan database lokal.
+- **UI States yang Proper**: Penanganan status **Loading** (saat memuat data), **Empty** (saat tidak ada catatan), dan **Content** (saat data tersedia).
+- **Compose Multiplatform**: Framework UI deklaratif untuk Android dan Desktop.
+- **Koin DI**: Dependency Injection yang ringan dan kuat untuk Kotlin Multiplatform.
+- **SQLDelight**: Local persistence dengan validasi skema saat compile-time.
+- **Jetpack DataStore**: Penyimpanan preferensi (Key-Value) yang modern dan reaktif.
 
 ---
 

@@ -38,8 +38,7 @@ class NoteDataSource(db: NoteDatabase) {
             id = note.id,
             title = note.title,
             content = note.content,
-            // Perbaikan: Konversi Boolean ke Long (1L jika true, 0L jika false)
-            isFavorite = if (note.isFavorite) 1L else 0L,
+            isFavorite = note.isFavorite, // Gunakan Boolean langsung
             createdAt = note.createdAt
         )
     }
@@ -53,8 +52,7 @@ class NoteDataSource(db: NoteDatabase) {
     }
 
     suspend fun toggleFavorite(id: Long, isFavorite: Boolean) {
-        // Perbaikan: Konversi Boolean ke Long untuk query update
-        queries.updateFavorite(if (isFavorite) 1L else 0L, id)
+        queries.updateFavorite(isFavorite, id) // Gunakan Boolean langsung
     }
 }
 
@@ -63,8 +61,7 @@ fun org.example.project.database.NoteEntity.toNote(): Note {
         id = id,
         title = title,
         content = content,
-        // Perbaikan: Konversi Long dari database kembali ke Boolean untuk model Note
-        isFavorite = isFavorite == 1L,
+        isFavorite = isFavorite, // Sudah Boolean
         createdAt = createdAt
     )
 }
