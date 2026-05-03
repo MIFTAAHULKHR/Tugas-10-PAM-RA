@@ -44,44 +44,15 @@ Aplikasi menampilkan indikator status jaringan secara *real-time* pada layar uta
 
 ---
 
-## Detail Teknis Implementasi
-Integrasi Antarmuka (UI)
-1.
-Main Screen: Menampilkan indikator (Banner/Icon) yang berubah warna atau teks berdasarkan status dari NetworkMonitor.
-2.
-Settings Screen: Menampilkan informasi teknis yang diambil dari DeviceInfo melalui Injeksi Koin ke dalam ViewModel.
+## 🛠️ Detail Teknis & Perbaikan
+Berdasarkan kendala pengembangan sebelumnya, berikut adalah konfigurasi krusial yang telah diimplementasikan:
 
-Struktur Koin Android (KoinAndroid.kt)
-Dependensi platform dikonfigurasi sebagai berikut:
-actual fun platformModule(): Module = module {
-    // 1. Menyediakan NetworkMonitor (Status Jaringan)
-    single { NetworkMonitor(get()) }
-
-    // 2. Menyediakan NoteDatabase (SQLDelight)
-    single {
-        val driver = DatabaseDriverFactory(get()).createDriver()
-        NoteDatabase(driver)
-    }
-
-    // 3. Menyediakan DataStore untuk penyimpanan lokal
-    single { DataStoreFactory(get()).create() }
-}
-
+### Izin Jaringan (Android)
+Untuk menjalankan `NetworkMonitor` tanpa error `SecurityException`, izin berikut telah ditambahkan pada `AndroidManifest.xml`:
+```xml
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 ---
-
-## Cara Menjalankan
-
-1.
-Clone repositori ini.
-2.
-Buka di Android Studio (versi Ladybug atau yang terbaru disarankan).
-3.
-Jalankan :composeApp:assembleDebug untuk build pertama kali.
-4.
-Jalankan aplikasi pada Emulator atau HP fisik.
-5.
-Untuk tes offline: Aktifkan Airplane Mode pada perangkat Anda untuk melihat perubahan indikator di Main Screen.
 
 **Disusun Oleh:** Miftahul Khoiriyah  
 **Jurusan:** Teknik Informatika - ITERA
