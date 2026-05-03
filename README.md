@@ -61,9 +61,9 @@ actual fun platformModule(): Module = module {
 ### Status Jaringan & Informasi Perangkat
 Aplikasi menampilkan indikator status jaringan pada **Main Screen** dan detail perangkat pada **Settings Screen**.
 
-| Status Online (Main) | Status Offline (Main) | Settings (Device Info) |
-| :---: | :---: | :---: |
-| <img src="pict/Online.png" width="250"> | <img src="pict/Offline.png" width="250"> | <img src="screenshot_device_info.png" width="250"> |
+| Status Online (Main) | Status Offline (Main) |
+| :---: | :---: | 
+| <img src="pict/Online.png" width="250"> | <img src="pict/Offline.png" width="250"> |
 
 ---
 
@@ -83,4 +83,4 @@ Aplikasi menampilkan indikator status jaringan pada **Main Screen** dan detail p
 **Disusun Oleh:**  
 **Miftahul Khoiriyah** (123140064)  
 Mahasiswa Teknik Informatika Semester 6 - **Institut Teknologi Sumatera (ITERA)**
-```
+
