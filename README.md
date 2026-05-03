@@ -44,24 +44,44 @@ Aplikasi menampilkan indikator status jaringan secara *real-time* pada layar uta
 
 ---
 
-## Arsitektur & Teknologi
+## Detail Teknis Implementasi
+Integrasi Antarmuka (UI)
+1.
+Main Screen: Menampilkan indikator (Banner/Icon) yang berubah warna atau teks berdasarkan status dari NetworkMonitor.
+2.
+Settings Screen: Menampilkan informasi teknis yang diambil dari DeviceInfo melalui Injeksi Koin ke dalam ViewModel.
 
-- **Offline First**: Memastikan aplikasi tetap berfungsi penuh meskipun tanpa koneksi internet dengan memprioritaskan database lokal.
-- **UI States yang Proper**: Penanganan status **Loading** (saat memuat data), **Empty** (saat tidak ada catatan), dan **Content** (saat data tersedia).
-- **Compose Multiplatform**: Framework UI deklaratif untuk Android dan Desktop.
-- **Koin DI**: Dependency Injection yang ringan dan kuat untuk Kotlin Multiplatform.
-- **SQLDelight**: Local persistence dengan validasi skema saat compile-time.
-- **Jetpack DataStore**: Penyimpanan preferensi (Key-Value) yang modern dan reaktif.
+Struktur Koin Android (KoinAndroid.kt)
+Dependensi platform dikonfigurasi sebagai berikut:
+actual fun platformModule(): Module = module {
+    // 1. Menyediakan NetworkMonitor (Status Jaringan)
+    single { NetworkMonitor(get()) }
+
+    // 2. Menyediakan NoteDatabase (SQLDelight)
+    single {
+        val driver = DatabaseDriverFactory(get()).createDriver()
+        NoteDatabase(driver)
+    }
+
+    // 3. Menyediakan DataStore untuk penyimpanan lokal
+    single { DataStoreFactory(get()).create() }
+}
+
 
 ---
 
 ## Cara Menjalankan
 
-1. Buka proyek menggunakan **Android Studio** (versi Ladybug atau terbaru).
-2. Lakukan **Gradle Sync** untuk memastikan semua dependensi terunduh dengan benar.
-3. Jalankan aplikasi:
-   - **Android**: Pilih target emulator/device dan jalankan modul `:composeApp`.
-   - **Desktop**: Jalankan perintah `./gradlew :composeApp:run` melalui terminal Android Studio.
+1.
+Clone repositori ini.
+2.
+Buka di Android Studio (versi Ladybug atau yang terbaru disarankan).
+3.
+Jalankan :composeApp:assembleDebug untuk build pertama kali.
+4.
+Jalankan aplikasi pada Emulator atau HP fisik.
+5.
+Untuk tes offline: Aktifkan Airplane Mode pada perangkat Anda untuk melihat perubahan indikator di Main Screen.
 
 **Disusun Oleh:** Miftahul Khoiriyah  
 **Jurusan:** Teknik Informatika - ITERA
