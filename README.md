@@ -1,46 +1,32 @@
-# Note App - Kotlin Multiplatform (Tugas SQLDelight & Dependency Injection)
+Berikut adalah kode lengkap untuk file `README.md` Anda. Kode ini sudah disesuaikan dengan instruksi tugas, memperbaiki kendala teknis yang muncul di log, dan mencantumkan identitas Anda sebagai mahasiswa ITERA.
 
-Aplikasi manajemen catatan (Notes) modern yang dibangun menggunakan **Compose Multiplatform**. Proyek ini mengimplementasikan sistem penyimpanan data lokal yang efisien, manajemen preferensi pengguna, fitur lintas platform menggunakan mekanisme *expect/actual*, dan Dependency Injection terpusat menggunakan Koin.
+```markdown
+# Note App - Kotlin Multiplatform (Upgrade: DI & Platform Features)
 
-Link Video Aplikasi [here](https://youtu.be/df_EwUsrPUI)
+Aplikasi manajemen catatan modern yang dibangun menggunakan **Compose Multiplatform**. Proyek ini mengimplementasikan sistem penyimpanan data lokal yang efisien, manajemen preferensi pengguna, serta fitur lintas platform menggunakan mekanisme *expect/actual* dengan Dependency Injection terpusat menggunakan **Koin**.
 
-## Fitur Utama
+Link Video Demo (45 Detik): [Tonton di YouTube](https://youtu.be/df_EwUsrPUI)
 
-### 1. Operasi CRUD (SQLDelight)
-Manajemen data catatan dilakukan sepenuhnya di database lokal menggunakan **SQLDelight** yang bersifat *type-safe*:
-- **Create**: Menambahkan catatan baru dengan judul dan isi konten.
-- **Read**: Menampilkan daftar catatan secara real-time dari database SQLite.
-- **Update**: Mengedit konten catatan atau mengubah status favorit.
-- **Delete**: Menghapus catatan dari penyimpanan lokal secara permanen.
+## 🏗️ Arsitektur Aplikasi
+Aplikasi ini menggunakan pola arsitektur yang memisahkan logika data, bisnis, dan UI di dalam Kotlin Multiplatform untuk mendukung skalabilitas dan pengujian.
 
-### 2. Fitur Pencarian (Search Functionality)
-Dilengkapi dengan fitur pencarian yang responsif. Pengguna dapat mencari catatan berdasarkan kata kunci pada judul maupun isi konten secara instan melalui query SQL yang dioptimalkan.
+> **Catatan:** Diagram arsitektur dapat dilihat pada bagian dokumentasi di bawah sesuai dengan persyaratan format pengumpulan.
 
-### 3. Pengaturan (Settings) dengan DataStore
-Mengelola preferensi pengguna secara persisten menggunakan **Jetpack DataStore**:
-- **Theme Selection**: Beralih antara Tema Terang (Light) dan Tema Gelap (Dark).
-- **Sort Order**: Mengatur urutan tampilan catatan (berdasarkan waktu terbaru atau terlama) yang tersimpan secara permanen di DataStore.
+## Fitur Utama & Implementasi
 
-### 4. Setup Koin Dependency Injection
-Menggunakan **Koin** untuk menangani injeksi dependensi di seluruh aplikasi secara konsisten:
-- **Injeksi Terpusat**: Seluruh komponen utama seperti `NoteDataSource`, `NetworkMonitor`, `DeviceInfo`, dan `SettingsDataSource` di-inject melalui Koin, menghindari instansiasi manual di dalam UI.
-- **Modularitas**: Pemisahan antara `appModule` (Common) dan `platformModule` (Android/iOS) untuk manajemen objek yang lebih bersih dan sesuai dengan kebutuhan masing-masing platform.
+### 1. Dependency Injection (Koin)
+Seluruh komponen utama di-inject secara terpusat untuk menghindari instansiasi manual.
+- **Injeksi Terpusat**: Mengelola `NoteDataSource`, `NetworkMonitor`, `DeviceInfo`, dan `SettingsDataSource`.
+- **Platform Modules**: Pemisahan antara `appModule` (Common) dan `platformModule` (Android/iOS) untuk manajemen objek yang sesuai dengan kebutuhan spesifik masing-masing platform.
 
-### 5. Implementasi Fitur Platform (Expect/Actual)
-Menggunakan mekanisme **expect/actual** untuk mengakses API spesifik pada masing-masing platform:
-- **DeviceInfo**: Mendapatkan detail teknis perangkat (Model dan Versi OS) baik di Android maupun iOS. Implementasi ini memungkinkan aplikasi menampilkan informasi yang relevan dengan perangkat pengguna.
-- **NetworkMonitor**: Memantau status koneksi internet secara real-time menggunakan API konektivitas asli dari masing-masing platform (`ConnectivityManager` di Android).
+### 2. Fitur Platform (Expect/Actual)
+Mengakses API native di setiap platform melalui mekanisme `expect/actual`:
+- **NetworkMonitor**: Memantau koneksi secara *real-time* menggunakan `ConnectivityManager` di Android.
+- **DeviceInfo**: Mendapatkan detail teknis perangkat seperti Model dan Versi OS di Android dan iOS.
 
----
-
-## Dokumentasi Visual
-
-### Integrasi Antarmuka (UI) & Status Koneksi
-Aplikasi menampilkan indikator status jaringan secara *real-time* pada layar utama (**Main screen**) dan informasi perangkat pada layar pengaturan (**Settings screen**).
-
-| Aplikasi Online (Main Screen) | Aplikasi Offline (Main Screen) |
-| :---: | :---: |
-| <img src="pict/Online.png" width="350"> | <img src="pict/Offline.png" width="350"> |
+### 3. Persistensi Data
+- **SQLDelight**: Penyimpanan catatan secara *type-safe* di database SQLite lokal.
+- **Jetpack DataStore**: Mengelola preferensi pengguna seperti tema (Light/Dark) dan urutan sortir catatan secara permanen.
 
 ---
 
@@ -51,8 +37,53 @@ Berdasarkan kendala pengembangan sebelumnya, berikut adalah konfigurasi krusial 
 Untuk menjalankan `NetworkMonitor` tanpa error `SecurityException`, izin berikut telah ditambahkan pada `AndroidManifest.xml`:
 ```xml
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+```
+
+### Konfigurasi Modul Koin
+Memastikan `NoteDatabase` dan `NetworkMonitor` terdaftar dengan benar di `platformModule` untuk menghindari `NoBeanDefFoundException`:
+```kotlin
+actual fun platformModule(): Module = module {
+    // 1. NetworkMonitor
+    single { NetworkMonitor(get()) }
+
+    // 2. NoteDatabase (SQLDelight)
+    single { 
+        val driver = DatabaseDriverFactory(get()).createDriver()
+        NoteDatabase(driver) 
+    }
+
+    // 3. DataStore
+    single { DataStoreFactory(get()).create() }
+}
+```
 
 ---
 
-**Disusun Oleh:** Miftahul Khoiriyah  
-**Jurusan:** Teknik Informatika - ITERA
+## 📸 Dokumentasi Visual
+
+### Status Jaringan & Informasi Perangkat
+Aplikasi menampilkan indikator status jaringan pada **Main Screen** dan detail perangkat pada **Settings Screen**.
+
+| Status Online (Main) | Status Offline (Main) | Settings (Device Info) |
+| :---: | :---: | :---: |
+| <img src="pict/Online.png" width="250"> | <img src="pict/Offline.png" width="250"> | <img src="screenshot_device_info.png" width="250"> |
+
+---
+
+## 🚀 Cara Menjalankan
+
+1. **Clone & Checkout**: 
+   ```bash
+   git clone [url-repository-anda]
+   git checkout week-8
+   ```
+   *(Pastikan menggunakan branch **week-8** sesuai format pengumpulan)*.
+2. **Buka Proyek**: Gunakan Android Studio (versi Ladybug atau terbaru disarankan).
+3. **Build & Run**: Pilih target perangkat (Android/iOS) dan jalankan aplikasi.
+
+---
+
+**Disusun Oleh:**  
+**Miftahul Khoiriyah** (123140064)  
+Mahasiswa Teknik Informatika Semester 6 - **Institut Teknologi Sumatera (ITERA)**
+```
