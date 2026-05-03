@@ -2,6 +2,8 @@
 
 Aplikasi manajemen catatan (Notes) modern yang dibangun menggunakan **Compose Multiplatform**. Proyek ini mengimplementasikan sistem penyimpanan data lokal yang efisien, manajemen preferensi pengguna, fitur lintas platform menggunakan mekanisme *expect/actual*, dan Dependency Injection terpusat menggunakan Koin.
 
+Link Video Aplikasi (https://youtu.be/df_EwUsrPUI)
+
 ## Fitur Utama
 
 ### 1. Operasi CRUD (SQLDelight)
