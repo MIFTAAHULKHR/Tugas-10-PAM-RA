@@ -71,7 +71,7 @@ Aplikasi menampilkan indikator status jaringan pada **Main Screen** dan detail p
 
 1. **Clone & Checkout**: 
    ```bash
-   git clone [url-repository-anda]
+   git clone [https://github.com/MIFTAAHULKHR/Tugas-8-PAM-RA.git](https://github.com/MIFTAAHULKHR/Tugas-8-PAM-RA.git)
    git checkout week-8
    ```
    *(Pastikan menggunakan branch **week-8** sesuai format pengumpulan)*.
