@@ -42,16 +42,6 @@ Aplikasi menampilkan indikator status jaringan secara *real-time* pada layar uta
 | :---: | :---: |
 | <img src="pict/Online.png" width="350"> | <img src="pict/Offline.png" width="350"> |
 
-### Fitur Lainnya & Device Info
-
-| Profile & Device Info (Settings) | Sort Order | Searching |
-| :---: | :---: | :---: |
-| <img src="pict/profile.png" width="220"> | <img src="pict/SortOrder.png" width="220"> | <img src="pict/Searching.png" width="220"> |
-
-| Delete Notes | Edit Notes |
-| :---: | :---: |
-| <img src="pict/DeleteNotes.png" width="220"> | <img src="pict/EditNotes.png" width="220"> |
-
 ---
 
 ## Arsitektur & Teknologi
