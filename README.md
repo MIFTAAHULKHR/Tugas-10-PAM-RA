@@ -250,4 +250,4 @@ composeApp/src/
 
 **Disusun oleh:**  
 **Miftahul Khoiriyah** (123140064)  
-Mahasiswa Teknik Informatika Semester 6 — **Institut Teknologi Sumatera (ITERA)**
+
