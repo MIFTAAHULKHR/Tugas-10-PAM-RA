@@ -34,10 +34,21 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.android.driver)
-
-            // Koin Android
             implementation("io.insert-koin:koin-android:3.5.3")
         }
+
+        // Blok androidUnitTest yang sudah digabungkan
+        val androidUnitTest by getting {
+            dependencies {
+                implementation("io.mockk:mockk:1.13.8")
+                implementation(libs.kotlin.test)
+                // Untuk ApplicationProvider di TestUtils (jika masih dibutuhkan)
+                implementation("androidx.test:core:1.5.0")
+                // Tambahkan driver JDBC SQLite murni untuk pengujian lokal di JVM
+                implementation("app.cash.sqldelight:sqlite-driver:2.0.1") // Pastikan versi 2.0.1 ini sama dengan versi SQLDelight di libs/version catalog Anda
+            }
+        }
+
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -48,36 +59,20 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
-
-            // Navigation
             implementation(libs.jetbrains.navigation.compose)
-
-            // Material Icons
             implementation(libs.compose.material.icons.extended)
-
-            // SQLDelight
             implementation(libs.sqldelight.coroutines.extensions)
             implementation(libs.sqldelight.primitive.adapters)
-
-            // DataStore
             implementation(libs.androidx.datastore.preferences)
-
-            // Koin Dependency Injection
             implementation("io.insert-koin:koin-core:3.5.3")
             implementation("io.insert-koin:koin-compose:1.1.2")
         }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-        }
-        val desktopMain by getting {
-            dependencies {
-                implementation(compose.desktop.currentOs)
-                implementation(libs.kotlinx.coroutines.swing)
-                implementation(libs.sqldelight.sqlite.driver)
-            }
-        }
-        iosMain.dependencies {
-            implementation(libs.sqldelight.native.driver)
+            implementation("io.insert-koin:koin-test:3.5.3")
+            implementation("app.cash.turbine:turbine:1.1.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
         }
     }
 }
@@ -92,17 +87,23 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/LICENSE*"
+            excludes += "META-INF/versions/9/previous-compilation-data.bin"
         }
     }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -111,12 +112,18 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+
+    // UI Testing on Android
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.3")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.3")
+
+    // MockK di instrumented test
+    androidTestImplementation("io.mockk:mockk-android:1.13.8")
 }
 
 compose.desktop {
     application {
         mainClass = "org.example.project.MainKt"
-
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.example.project"

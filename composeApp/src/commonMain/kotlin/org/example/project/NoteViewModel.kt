@@ -14,7 +14,7 @@ data class NotesUiState(
 )
 
 class NoteViewModel(
-    private val noteDataSource: NoteDataSource,
+    private val noteRepository: NoteRepository,
     private val settingsDataSource: SettingsDataSource
 ) : ViewModel() {
 
@@ -22,7 +22,7 @@ class NoteViewModel(
     val searchQuery = _searchQuery.asStateFlow()
 
     val uiState: StateFlow<NotesUiState> = combine(
-        noteDataSource.getAllNotes(),
+        noteRepository.getAllNotes(),
         _searchQuery,
         settingsDataSource.sortOrder
     ) { notes, query, sortOrder ->
@@ -70,29 +70,29 @@ class NoteViewModel(
                 content = content,
                 createdAt = Clock.System.now().toEpochMilliseconds()
             )
-            noteDataSource.insertNote(note)
+            noteRepository.insertNote(note)
         }
     }
 
     fun updateNote(id: Long, title: String, content: String) {
         viewModelScope.launch {
-            noteDataSource.updateNote(id, title, content)
+            noteRepository.updateNote(id, title, content)
         }
     }
 
     fun deleteNote(id: Long) {
         viewModelScope.launch {
-            noteDataSource.deleteNote(id)
+            noteRepository.deleteNote(id)
         }
     }
 
     fun toggleFavorite(note: Note) {
         viewModelScope.launch {
-            noteDataSource.toggleFavorite(note.id!!, !note.isFavorite)
+            noteRepository.toggleFavorite(note.id!!, !note.isFavorite)
         }
     }
 
     suspend fun getNoteById(id: Long): Note? {
-        return noteDataSource.getNoteById(id)
+        return noteRepository.getNoteById(id)
     }
 }
